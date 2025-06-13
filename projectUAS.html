@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Aplikasi Donor Darah</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+    body {
+      margin: 0; padding: 0;
+      background: linear-gradient(to right, #f12711, #f5af19);
+      min-height: 100vh;
+      display: flex; justify-content: center; align-items: center;
+    }
+    .container {
+      background-color: #fff;
+      width: 100%; max-width: 500px;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    }
+    h2, h3 { text-align: center; color: #c0392b; }
+    input, select, textarea {
+      width: 100%; padding: 12px; margin-top: 10px;
+      border-radius: 8px; border: 1px solid #ccc; font-size: 14px;
+    }
+    button {
+      width: 100%; padding: 12px; margin-top: 20px;
+      background: #e74c3c; border: none;
+      color: white; font-weight: bold; border-radius: 8px; cursor: pointer;
+    }
+    button:hover { background: #c0392b; }
+    .link {
+      text-align: center; margin-top: 15px; font-size: 14px;
+    }
+    .hidden { display: none; }
+    ul { font-size: 14px; margin: 10px 0 20px 20px; }
+    #menu {
+      display: none;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    #menu button {
+      width: auto;
+      padding: 10px 15px;
+      margin-top: 0;
+      background: #bdc3c7;
+      color: #2c3e50;
+    }
+    #menu button:hover {
+      background: #95a5a6;
+    }
+    .brosur-data {
+      background: #fceae8;
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 15px;
+    }
+    .brosur-data p {
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+  <div style="text-align:center;">
+    <img src="https://upload.wikimedia.org/wikipedia/id/thumb/3/3d/Logo_Palang_Merah_Indonesia.svg/1200px-Logo_Palang_Merah_Indonesia.svg.png" alt="Logo PMI" style="max-width: 100px; margin-bottom: 10px;">
+  </div>
+
+    <!-- Menu Navigasi -->
+    <div id="menu" class="hidden">
+      <button onclick="showPage('formPage')" id="formBtn">Form Donor</button>
+      <button onclick="showPage('profilePage')" id="profileBtn">Profil</button>
+      <button onclick="showPage('adminPage')" id="adminBtn" class="hidden">Data Donor</button>
+      <button onclick="logout()">Logout</button>
+    </div>
+
+    <!-- Halaman Login -->
+    <div id="loginPage">
+      <h2>Login</h2>
+      <input type="text" id="loginEmail" placeholder="Email" required />
+      <input type="password" id="loginPassword" placeholder="Kata Sandi" required />
+      <button onclick="login()">Masuk</button>
+      <div class="link">
+        Belum punya akun? <a href="#" onclick="showPage('registerPage')">Buat Akun</a>
+      </div>
+    </div>
+
+    <!-- Halaman Register -->
+    <div id="registerPage" class="hidden">
+      <h2>Buat Akun</h2>
+      <input type="text" id="regName" placeholder="Nama Lengkap" required />
+      <input type="email" id="regEmail" placeholder="Email" required />
+      <input type="password" id="regPassword" placeholder="Kata Sandi" required />
+      <button onclick="register()">Daftar</button>
+      <div class="link">
+        Sudah punya akun? <a href="#" onclick="showPage('loginPage')">Login</a>
+      </div>
+    </div>
+
+    <!-- Halaman Form Donor -->
+    <div id="formPage" class="hidden">
+      <h2>Pendaftaran Donor Darah</h2>
+      <ul>
+        <li>Berusia 17–60 tahun</li>
+        <li>Berat badan minimal 45 kg</li>
+        <li>Sehat jasmani dan rohani</li>
+        <li>Tidak memiliki penyakit bawaam</li>
+        <li>Tidak mengonsumsi obat obatan</li>
+      </ul>
+      <form id="donorForm">
+        <input type="text" id="formNama" placeholder="Nama Lengkap" required />
+        <input type="text" id="formNIK" placeholder="NIK" minlength="16" maxlength="16" required />
+        <input type="text" id="formGoldar" placeholder="Golongan Darah" required />
+        <input type="text" id="formTempat" value="RSUD Trunojoyo, Universitas Trunojoyo Madura" readonly />
+        <input type="date" id="formTanggal" required />
+        <select id="formKesehatan" required>
+          <option value="">-- Apakah Anda sehat? --</option>
+          <option value="Sehat">Sehat</option>
+          <option value="Tidak Sehat">Tidak Sehat</option>
+        </select>
+        <button type="submit">Kirim Pendaftaran</button>
+      </form>
+    </div>
+
+    <!-- Halaman Profil -->
+    <div id="profilePage" class="hidden">
+      <h2>Profil Pengguna</h2>
+      <p><strong>Nama:</strong> <span id="profileName">-</span></p>
+      <p><strong>Email:</strong> <span id="profileEmail">-</span></p>
+      <p><strong>Jumlah Donor:</strong> <span id="profileDonorCount">0</span> kali</p>
+    </div>
+
+    <!-- Halaman Brosur -->
+    <div id="brosurPage" class="hidden">
+      <h2>Bukti Pendaftaran</h2>
+      <div class="brosur-data">
+        <p><strong>Nama:</strong> <span id="brosurNama"></span></p>
+        <p><strong>NIK:</strong> <span id="brosurNIK"></span></p>
+        <p><strong>Golongan Darah:</strong> <span id="brosurGoldar"></span></p>
+        <p><strong>Tempat Donor:</strong> <span id="brosurTempat"></span></p>
+        <p><strong>Tanggal Donor:</strong> <span id="brosurTanggal"></span></p>
+        <p><strong>Status:</strong> <span id="brosurStatus">Menunggu verifikasi admin</span></p>
+      </div>
+      <button onclick="showPage('formPage')">Kembali ke Form</button>
+      <button onclick="logout()">Logout</button>
+    </div>
+
+    <!-- Halaman Admin -->
+    <div id="adminPage" class="hidden">
+      <h2>Data Pendaftar Donor</h2>
+      <div style="text-align:center; margin-bottom: 10px;">
+        <button onclick="filterAdminData('Menunggu')">Masuk</button>
+        <button onclick="filterAdminData('Diterima')">ACC</button>
+        <button onclick="filterAdminData('Ditolak')">Ditolak</button>
+      </div>
+      <div id="adminData"></div>
+      <button onclick="logout()">Logout</button>
+    </div>
+
+  </div>
+
+<script>
+let currentUser = null;
+let users = JSON.parse(localStorage.getItem('users')) || [];
+const donorCounts = JSON.parse(localStorage.getItem('donorCounts')) || {};
+const donorData = JSON.parse(localStorage.getItem('donorData')) || [];
+
+function saveData() {
+  localStorage.setItem('users', JSON.stringify(users));
+  localStorage.setItem('donorCounts', JSON.stringify(donorCounts));
+  localStorage.setItem('donorData', JSON.stringify(donorData));
+  if (currentUser) {
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+  } else {
+    localStorage.removeItem('currentUser');
+  }
+}
+
+function showPage(pageId) {
+  ['loginPage', 'registerPage', 'formPage', 'profilePage', 'brosurPage', 'adminPage']
+    .forEach(id => document.getElementById(id).classList.add('hidden'));
+  document.getElementById(pageId).classList.remove('hidden');
+
+  const menu = document.getElementById('menu');
+  const isLoggedIn = currentUser !== null;
+  const isAdmin = currentUser && currentUser.isAdmin;
+  menu.classList.toggle('hidden', !isLoggedIn || isAdmin);
+}
+
+function login() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass = document.getElementById('loginPassword').value;
+
+  if (email === 'admin@donor.com' && pass === 'admin123') {
+    currentUser = { email, name: 'Admin', isAdmin: true };
+    showPage('adminPage');
+    showAdminData('Menunggu');
+    saveData();
+    return;
+  }
+
+  const user = users.find(u => u.email === email && u.password === pass);
+  if (user) {
+    currentUser = { email: user.email, name: user.name, isAdmin: false };
+    if (!donorCounts[email]) donorCounts[email] = 0;
+    document.getElementById('profileName').textContent = user.name;
+    document.getElementById('profileEmail').textContent = user.email;
+    document.getElementById('profileDonorCount').textContent = donorCounts[email];
+    showPage('formPage');
+    saveData();
+  } else {
+    alert("Login gagal. Pastikan email dan password sudah terdaftar.");
+  }
+}
+
+function register() {
+  const name = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const pass = document.getElementById('regPassword').value;
+
+  if (!name || !email || !pass) {
+    alert("Lengkapi semua field.");
+    return;
+  }
+
+  const emailExists = users.some(u => u.email === email);
+  if (emailExists) {
+    alert("Email sudah digunakan. Gunakan email lain.");
+    return;
+  }
+
+  users.push({ name, email, password: pass });
+  saveData();
+  alert("Pendaftaran berhasil. Silakan login.");
+  showPage('loginPage');
+}
+
+function logout() {
+  currentUser = null;
+  saveData();
+  showPage('loginPage');
+}
+
+document.getElementById('donorForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  if (!currentUser || currentUser.isAdmin) {
+    alert("Login sebagai pengguna terlebih dahulu.");
+    return;
+  }
+
+  const nama = document.getElementById('formNama').value.trim();
+  const nik = document.getElementById('formNIK').value.trim();
+  const goldar = document.getElementById('formGoldar').value.trim();
+  const tempat = document.getElementById('formTempat').value;
+  const tanggal = document.getElementById('formTanggal').value;
+  const kesehatan = document.getElementById('formKesehatan').value;
+
+  if (kesehatan !== "Sehat") {
+    alert("Maaf, hanya peserta yang dalam kondisi sehat yang bisa mendaftar.");
+    return;
+  }
+
+  donorCounts[currentUser.email] = (donorCounts[currentUser.email] || 0) + 1;
+  document.getElementById('profileDonorCount').textContent = donorCounts[currentUser.email];
+
+  const entry = { nama, nik, goldar, tempat, tanggal, kesehatan, status: "Menunggu" };
+  donorData.push(entry);
+  saveData();
+
+  document.getElementById('brosurNama').textContent = nama;
+  document.getElementById('brosurNIK').textContent = nik;
+  document.getElementById('brosurGoldar').textContent = goldar;
+  document.getElementById('brosurTempat').textContent = tempat;
+  document.getElementById('brosurTanggal').textContent = tanggal;
+  document.getElementById('brosurStatus').textContent = entry.status;
+
+  this.reset();
+  showPage('brosurPage');
+});
+
+function showAdminData(filterStatus = 'Menunggu') {
+  const container = document.getElementById('adminData');
+  const filtered = donorData.filter(d => d.status === filterStatus);
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<p>Tidak ada data pendaftar dengan status <strong>${filterStatus}</strong>.</p>`;
+    return;
+  }
+
+  container.innerHTML = filtered.map((d, i) => {
+    const index = donorData.indexOf(d);
+    return `
+      <div class="brosur-data">
+        <h4>${filterStatus === 'Menunggu' ? 'Pendaftar Baru' : 'Data Pendaftar'}</h4>
+        <p><strong>Nama:</strong> ${d.nama}</p>
+        <p><strong>NIK:</strong> ${d.nik}</p>
+        <p><strong>Golongan Darah:</strong> ${d.goldar}</p>
+        <p><strong>Tempat:</strong> ${d.tempat}</p>
+        <p><strong>Tanggal:</strong> ${d.tanggal}</p>
+        <p><strong>Kesehatan:</strong> ${d.kesehatan}</p>
+        <p><strong>Status:</strong> <span id="status-${index}">${d.status}</span></p>
+        ${filterStatus === 'Menunggu' ? `
+          <button onclick="updateStatus(${index}, 'Diterima')">ACC</button>
+          <button onclick="updateStatus(${index}, 'Ditolak')">Tolak</button>
+        ` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+function updateStatus(index, newStatus) {
+  donorData[index].status = newStatus;
+  saveData();
+  showAdminData('Menunggu');
+}
+
+function filterAdminData(status) {
+  showAdminData(status);
+}
+
+window.onload = () => {
+  const savedUser = localStorage.getItem('currentUser');
+  if (savedUser) {
+    currentUser = JSON.parse(savedUser);
+    if (currentUser.isAdmin) {
+      showPage('adminPage');
+      showAdminData('Menunggu');
+    } else {
+      if (!donorCounts[currentUser.email]) donorCounts[currentUser.email] = 0;
+      document.getElementById('profileName').textContent = currentUser.name;
+      document.getElementById('profileEmail').textContent = currentUser.email;
+      document.getElementById('profileDonorCount').textContent = donorCounts[currentUser.email];
+      showPage('formPage');
+    }
+  } else {
+    showPage('loginPage');
+  }
+};
+</script>
+</body>
+</html>
